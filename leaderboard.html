@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pressure Flyer – Live Leaderboard</title>
+    <style>
+      :root {
+        --sky: #72c9f7;
+        --sky-deep: #4fb1ea;
+        --grass: #4aa83f;
+        --grass-deep: #2c7d32;
+        --ink: #141414;
+        --panel: rgba(255, 255, 255, 0.84);
+        font-family: "Trebuchet MS", Arial, sans-serif;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        width: 100%; height: 100vh;
+        overflow: hidden;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.28), transparent 35%),
+          linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 74%, var(--grass) 75%, var(--grass-deep) 100%);
+      }
+
+      /* ── Clouds ── */
+      .cloud {
+        position: fixed;
+        width: 145px; height: 44px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 46px -16px 0 8px rgba(255,255,255,0.9), 82px 4px 0 2px rgba(255,255,255,0.9);
+        pointer-events: none;
+      }
+      .cloud-a { left: 6%;   top: 8%;  }
+      .cloud-b { right: 12%; top: 14%; transform: scale(0.8); }
+      .cloud-c { left: 55%;  top: 5%;  transform: scale(0.55); }
+      .cloud-d { left: 28%;  top: 18%; transform: scale(0.65); }
+
+      /* ── Scenery (all fixed, won't affect layout) ── */
+      .bird {
+        position: fixed;
+        left: 4%; top: 50%;
+        width: 70px; height: 48px;
+        border-radius: 50% 48% 48% 54%;
+        background: #ffd94f;
+        border: 3px solid #b77612;
+        transform: rotate(-7deg) scale(1.4);
+        pointer-events: none;
+      }
+      .bird .wing {
+        position: absolute; left: 18px; top: 21px;
+        width: 34px; height: 18px;
+        border-radius: 50%; background: #f4a62a;
+        transform: rotate(-18deg);
+      }
+      .bird .eye {
+        position: absolute; right: 15px; top: 12px;
+        width: 8px; height: 8px;
+        border-radius: 50%; background: #111;
+      }
+      .bird .beak {
+        position: absolute; right: -17px; top: 20px;
+        width: 0; height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 18px solid #f2801f;
+      }
+
+      .tree {
+        position: fixed; right: 6%; bottom: 6%;
+        width: 52px; height: 130px;
+        background: #7a431d;
+        border-radius: 8px 8px 0 0;
+        pointer-events: none;
+      }
+      .tree::before, .tree::after, .tree span {
+        content: ""; position: absolute;
+        border-radius: 50%; background: #1d7d3d;
+      }
+      .tree::before { width: 110px; height: 110px; left: -30px; top: -60px; }
+      .tree::after  { width:  94px; height:  94px; left: -62px; top: -28px; }
+      .tree span    { width:  92px; height:  92px; left:  16px; top: -28px; }
+
+      .shrub {
+        position: fixed; left: 22%; bottom: 5%;
+        width: 98px; height: 44px;
+        border-radius: 999px 999px 0 0;
+        background: #2f944b;
+        box-shadow: 34px -10px 0 #3aad55, 66px 0 0 #247d3c;
+        pointer-events: none;
+      }
+      .rock {
+        position: fixed; right: 26%; bottom: 5%;
+        width: 70px; height: 34px;
+        border-radius: 50% 50% 10px 10px;
+        background: #7d8587;
+        pointer-events: none;
+      }
+      .flower {
+        position: fixed;
+        width: 12px; height: 34px;
+        background: #247d3c;
+        pointer-events: none;
+      }
+      .flower::before {
+        content: ""; position: absolute;
+        left: -9px; top: -10px;
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 50%, #ffd94f 0 22%, #f06292 24% 100%);
+      }
+      .flower-a { left: 36%; bottom: 6%; }
+      .flower-b { right: 18%; bottom: 8%; transform: scale(0.8); }
+
+      /* ── Panel ── */
+      .panel {
+        position: relative;
+        z-index: 10;
+        width: min(620px, calc(100vw - 32px));
+        /* Shrink vertically to always fit; cap at 96vh with a little breathing room */
+        max-height: 96vh;
+        padding: clamp(14px, 2.5vh, 28px) clamp(18px, 3vw, 32px);
+        border: 4px solid rgba(20,20,20,0.12);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 18px 42px rgba(18,70,108,0.22);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      h1 {
+        /* Scales from 28px up to 52px depending on available height */
+        font-size: clamp(28px, 5.5vh, 52px);
+        line-height: 1;
+        margin-bottom: clamp(2px, 0.6vh, 6px);
+        flex-shrink: 0;
+      }
+
+      .subtitle {
+        font-size: clamp(11px, 1.4vh, 14px);
+        font-weight: 700;
+        color: #1d4f7a;
+        margin-bottom: clamp(8px, 1.5vh, 18px);
+        flex-shrink: 0;
+      }
+
+      /* ── Table ── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        flex: 1;          /* fills remaining panel height */
+      }
+
+      thead th {
+        text-align: left;
+        padding: clamp(4px, 0.8vh, 8px) 10px;
+        font-size: clamp(10px, 1.3vh, 13px);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 3px solid rgba(20,20,20,0.14);
+        color: #1d4f7a;
+      }
+      thead th:last-child { text-align: right; }
+
+      tbody tr { border-bottom: 1px solid rgba(20,20,20,0.08); }
+      tbody tr:hover { background: rgba(255,255,255,0.55); }
+
+      tbody td {
+        padding: clamp(5px, 1vh, 10px) 10px;
+        font-size: clamp(14px, 2vh, 20px);
+        vertical-align: middle;
+      }
+      tbody td:last-child {
+        text-align: right;
+        font-weight: 900;
+        font-size: clamp(15px, 2.2vh, 22px);
+      }
+
+      .rank {
+        width: 40px;
+        font-weight: 900;
+        color: rgba(20,20,20,0.35);
+      }
+      .rank-1 { color: #c8920a; }
+      .rank-2 { color: #6b7280; }
+      .rank-3 { color: #92400e; }
+
+      .empty {
+        text-align: center;
+        padding: clamp(16px, 3vh, 32px);
+        color: rgba(20,20,20,0.45);
+        font-weight: 700;
+      }
+
+      /* ── Status bar ── */
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: clamp(6px, 1vh, 14px);
+        font-size: clamp(10px, 1.2vh, 13px);
+        font-weight: 700;
+        color: rgba(20,20,20,0.5);
+        flex-shrink: 0;
+      }
+      .dot {
+        width: 9px; height: 9px;
+        border-radius: 50%;
+        background: #137d27;
+        flex-shrink: 0;
+      }
+      .dot.error { background: #b31818; }
+    </style>
+  </head>
+  <body>
+
+    <!-- Clouds -->
+    <div class="cloud cloud-a"></div>
+    <div class="cloud cloud-b"></div>
+    <div class="cloud cloud-c"></div>
+    <div class="cloud cloud-d"></div>
+
+    <!-- Scenery -->
+    <div class="bird" aria-hidden="true">
+      <span class="wing"></span>
+      <span class="eye"></span>
+      <span class="beak"></span>
+    </div>
+    <div class="tree" aria-hidden="true"><span></span></div>
+    <div class="shrub" aria-hidden="true"></div>
+    <div class="rock"  aria-hidden="true"></div>
+    <div class="flower flower-a" aria-hidden="true"></div>
+    <div class="flower flower-b" aria-hidden="true"></div>
+
+    <!-- Leaderboard panel -->
+    <div class="panel">
+      <h1>Live Leaderboard</h1>
+      <p class="subtitle" id="subtitle">Loading…</p>
+
+      <table aria-live="polite" aria-label="Top 10 scores">
+        <thead>
+          <tr>
+            <th class="rank">#</th>
+            <th>Team</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="3" class="empty">Loading scores…</td></tr>
+        </tbody>
+      </table>
+
+      <div class="status-bar">
+        <div class="dot" id="dot"></div>
+        <span id="statusText">Connecting…</span>
+      </div>
+    </div>
+
+    <script>
+      const FIREBASE_URL =
+        "https://bird-rehab-game-default-rtdb.asia-southeast1.firebasedatabase.app/game_results.json";
+
+      const tbody      = document.getElementById("tbody");
+      const subtitle   = document.getElementById("subtitle");
+      const dot        = document.getElementById("dot");
+      const statusText = document.getElementById("statusText");
+
+      const MEDALS = ["🥇", "🥈", "🥉"];
+
+      async function fetchLeaderboard() {
+        try {
+          const res = await fetch(FIREBASE_URL);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+
+          // Keep best score per team
+          const best = {};
+          if (data && typeof data === "object") {
+            for (const entry of Object.values(data)) {
+              if (!entry || typeof entry.teamNumber === "undefined") continue;
+              const team  = String(entry.teamNumber).trim();
+              const score = Number(entry.score) || 0;
+              if (!best[team] || score > best[team]) best[team] = score;
+            }
+          }
+
+          const rows = Object.entries(best)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+          renderTable(rows);
+          setStatus(true, `Auto-refreshing · last updated ${timestamp()}`);
+        } catch (err) {
+          console.error(err);
+          setStatus(false, "Failed to load – check console for details");
+        }
+      }
+
+      function renderTable(rows) {
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="empty">No scores yet – play a game!</td></tr>`;
+          subtitle.textContent = "Top 10 teams";
+          return;
+        }
+        subtitle.textContent = `Top ${rows.length} team${rows.length !== 1 ? "s" : ""}`;
+        tbody.innerHTML = rows.map(([team, score], i) => {
+          const rank    = i + 1;
+          const rankCls = rank <= 3 ? ` rank-${rank}` : "";
+          const label   = rank <= 3 ? MEDALS[i] : rank;
+          return `<tr>
+            <td class="rank${rankCls}">${label}</td>
+            <td>${escHtml(team)}</td>
+            <td>${score}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      function setStatus(ok, message) {
+        dot.className = "dot" + (ok ? "" : " error");
+        statusText.textContent = message;
+      }
+
+      function timestamp() {
+        return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      }
+
+      function escHtml(str) {
+        return str.replace(/[&<>"']/g, c =>
+          ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      }
+
+      fetchLeaderboard();
+      setInterval(fetchLeaderboard, 3000);
+    </script>
+  </body>
+</html>

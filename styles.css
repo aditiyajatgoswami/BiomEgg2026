@@ -1,0 +1,395 @@
+:root {
+  --sky: #72c9f7;
+  --sky-deep: #4fb1ea;
+  --grass: #4aa83f;
+  --grass-deep: #2c7d32;
+  --ink: #141414;
+  --panel: rgba(255, 255, 255, 0.84);
+  --button: #f7c948;
+  --button-edge: #d99b16;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--sky);
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.game-shell,
+.screen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.screen {
+  display: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-active {
+  display: block;
+}
+
+.sky-screen {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 35%),
+    linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 74%, var(--grass) 75%, var(--grass-deep) 100%);
+}
+
+.landing-panel,
+.result-panel {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: min(680px, calc(100vw - 32px));
+  padding: 30px;
+  border: 4px solid rgba(20, 20, 20, 0.12);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 18px 42px rgba(18, 70, 108, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: clamp(42px, 7vw, 78px);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 42px;
+  letter-spacing: 0;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 120px minmax(120px, 1fr) auto minmax(130px, auto);
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.team-row {
+  grid-template-columns: 120px minmax(120px, 220px);
+}
+
+label {
+  font-weight: 700;
+}
+
+input {
+  min-width: 0;
+  height: 42px;
+  padding: 8px 12px;
+  border: 2px solid rgba(20, 20, 20, 0.24);
+  border-radius: 6px;
+  background: #fff;
+}
+
+button {
+  min-height: 42px;
+  border: 0;
+  border-bottom: 4px solid var(--button-edge);
+  border-radius: 7px;
+  padding: 8px 16px;
+  background: var(--button);
+  color: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+button:disabled {
+  cursor: wait;
+  filter: grayscale(0.35);
+  transform: none;
+}
+
+button:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+button:active {
+  border-bottom-width: 2px;
+  transform: translateY(1px);
+}
+
+.start-button {
+  width: 100%;
+  margin-top: 18px;
+  min-height: 56px;
+  font-size: 24px;
+}
+
+.status {
+  min-height: 24px;
+  font-weight: 800;
+}
+
+.status.connected {
+  color: #137d27;
+}
+
+.status.failed {
+  color: #b31818;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.score {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  min-width: 74px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.result-panel {
+  width: min(430px, calc(100vw - 32px));
+  text-align: center;
+}
+
+#finalScore {
+  margin: 0;
+  color: #000;
+  font-size: 76px;
+  font-weight: 900;
+}
+
+.save-status {
+  min-height: 22px;
+  margin: 4px 0 0;
+  color: #1d4f7a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.save-status.failed {
+  color: #b31818;
+}
+
+.save-status.saved {
+  color: #137d27;
+}
+
+.cloud {
+  position: absolute;
+  width: 145px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 46px -16px 0 8px rgba(255, 255, 255, 0.9), 82px 4px 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.cloud-a {
+  left: 8%;
+  top: 12%;
+}
+
+.cloud-b {
+  right: 18%;
+  top: 20%;
+  transform: scale(0.8);
+}
+
+.cloud-c {
+  left: 64%;
+  top: 8%;
+  transform: scale(0.55);
+}
+
+.landing-art > * {
+  position: absolute;
+}
+
+.bird {
+  width: 70px;
+  height: 48px;
+  border-radius: 50% 48% 48% 54%;
+  background: #ffd94f;
+  border: 3px solid #b77612;
+}
+
+.bird-preview {
+  left: 12%;
+  top: 44%;
+  transform: rotate(-7deg) scale(1.75);
+}
+
+.wing {
+  position: absolute;
+  left: 18px;
+  top: 21px;
+  width: 34px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f4a62a;
+  transform: rotate(-18deg);
+}
+
+.eye {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #111;
+}
+
+.beak {
+  position: absolute;
+  right: -17px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 18px solid #f2801f;
+}
+
+.tree {
+  width: 52px;
+  height: 160px;
+  background: #7a431d;
+  border-radius: 8px 8px 0 0;
+}
+
+.tree::before,
+.tree::after,
+.tree span {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: #1d7d3d;
+}
+
+.tree::before {
+  width: 126px;
+  height: 126px;
+  left: -38px;
+  top: -72px;
+}
+
+.tree::after {
+  width: 106px;
+  height: 106px;
+  left: -72px;
+  top: -34px;
+}
+
+.tree span {
+  width: 104px;
+  height: 104px;
+  left: 18px;
+  top: -34px;
+}
+
+.tree-preview {
+  right: 14%;
+  bottom: 8%;
+}
+
+.shrub-a {
+  left: 28%;
+  bottom: 7%;
+  width: 98px;
+  height: 44px;
+  border-radius: 999px 999px 0 0;
+  background: #2f944b;
+  box-shadow: 34px -10px 0 #3aad55, 66px 0 0 #247d3c;
+}
+
+.rock-a {
+  right: 34%;
+  bottom: 6%;
+  width: 70px;
+  height: 34px;
+  border-radius: 50% 50% 10px 10px;
+  background: #7d8587;
+}
+
+.flower {
+  width: 12px;
+  height: 34px;
+  background: #247d3c;
+}
+
+.flower::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: -10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #ffd94f 0 22%, #f06292 24% 100%);
+}
+
+.flower-a {
+  left: 42%;
+  bottom: 8%;
+}
+
+.flower-b {
+  right: 24%;
+  bottom: 10%;
+  transform: scale(0.8);
+}
+
+@media (max-width: 680px) {
+  .landing-panel {
+    top: 50%;
+    padding: 22px;
+  }
+
+  .field-row,
+  .team-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .status {
+    min-height: 22px;
+  }
+
+  .bird-preview {
+    left: 8%;
+    top: 16%;
+    transform: scale(1.1);
+  }
+
+  .tree-preview {
+    right: 8%;
+    transform: scale(0.72);
+    transform-origin: bottom right;
+  }
+}
+
+

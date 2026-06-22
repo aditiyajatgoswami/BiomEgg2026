@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pressure Flyer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section id="landing" class="screen screen-active sky-screen">
+        <div class="cloud cloud-a"></div>
+        <div class="cloud cloud-b"></div>
+        <div class="cloud cloud-c"></div>
+        <div class="landing-art" aria-hidden="true">
+          <div class="bird bird-preview">
+            <span class="wing"></span>
+            <span class="eye"></span>
+            <span class="beak"></span>
+          </div>
+          <div class="tree tree-preview"><span></span></div>
+          <div class="shrub shrub-a"></div>
+          <div class="rock rock-a"></div>
+          <div class="flower flower-a"></div>
+          <div class="flower flower-b"></div>
+        </div>
+
+        <div class="landing-panel">
+          <h1>Pressure Flyer</h1>
+          <div class="field-row">
+            <label for="comPort">COM Port</label>
+            <input id="comPort" type="text" inputmode="text" placeholder="COM3" autocomplete="off" />
+            <button id="connectButton" type="button">Connect</button>
+            <span id="connectStatus" class="status" role="status" aria-live="polite"></span>
+          </div>
+          <div class="field-row team-row">
+            <label for="teamNumber">Team number</label>
+            <input id="teamNumber" type="text" inputmode="numeric" placeholder="12" autocomplete="off" />
+          </div>
+          <button id="startButton" class="start-button" type="button">Start Game!</button>
+        </div>
+      </section>
+
+      <section id="game" class="screen sky-screen" aria-label="Pressure Flyer game">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+        <div id="score" class="score">0</div>
+      </section>
+
+      <section id="gameOver" class="screen sky-screen">
+        <div class="cloud cloud-a"></div>
+        <div class="cloud cloud-b"></div>
+        <div class="result-panel">
+          <h2>Final score</h2>
+          <p id="finalScore">0</p>
+          <p id="saveStatus" class="save-status" role="status" aria-live="polite"></p>
+          <button id="newGameButton" class="start-button" type="button">Start new game</button>
+        </div>
+      </section>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>
