@@ -223,8 +223,6 @@ function handleInput(now, dt) {
     bird.y = ceiling;
     bird.vy = Math.max(0, bird.vy);
   }
-
-  console.log(state.signal);
 }
 
 function seekY(target, strength, dt) {
